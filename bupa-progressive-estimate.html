@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bupa – Cost Estimate</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiempos+Headline:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #003087;
+  --navy-deep: #001a52;
+  --blue: #0072CE;
+  --blue-light: #E8F1FB;
+  --teal: #00A3A1;
+  --teal-dim: rgba(0,163,161,0.15);
+  --warm: #F6F4F1;
+  --ink: #111827;
+  --mid: #6B7280;
+  --soft: #9CA3AF;
+  --border: #E5E9F0;
+  --white: #ffffff;
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --warn: #D97706;
+  --warn-bg: #FFFBEB;
+  --restricted: #7C3AED;
+  --restricted-bg: #F5F3FF;
+  --error: #DC2626;
+  --error-bg: #FEF2F2;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+}
+
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--warm);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+.nav {
+  width: 100%;
+  max-width: 480px;
+  padding: 14px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--warm);
+}
+.nav-back {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; color: var(--ink);
+  cursor: pointer; transition: background 0.15s;
+}
+.nav-back:hover { background: var(--border); }
+.nav-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.nav-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 600;
+}
+
+/* ── PAGE ── */
+.page {
+  width: 100%;
+  max-width: 480px;
+  padding: 0 16px 120px;
+}
+
+/* ── HERO ESTIMATE ── */
+.hero {
+  background: linear-gradient(160deg, var(--navy-deep) 0%, var(--navy) 60%, #005ab5 100%);
+  border-radius: var(--radius);
+  padding: 24px 22px 22px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,163,161,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: -20px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Policy badge */
+.policy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 20px;
+  padding: 4px 10px 4px 8px;
+  margin-bottom: 18px;
+  position: relative; z-index: 1;
+}
+.policy-pill-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #94A3B8;
+}
+.policy-pill-text {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  letter-spacing: 0.01em;
+}
+.policy-pill-excess {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  padding-left: 4px;
+  border-left: 1px solid rgba(255,255,255,0.18);
+  margin-left: 2px;
+}
+
+/* Estimate label + amount */
+.estimate-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 6px;
+  position: relative; z-index: 1;
+}
+.estimate-amount-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+  position: relative; z-index: 1;
+  min-height: 60px;
+}
+.estimate-currency {
+  font-family: 'Tiempos Headline', serif;
+  font-size: 2rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1;
+  margin-bottom: 4px;
+  transition: color 0.4s;
+}
+.estimate-currency.active { color: rgba(255,255,255,0.9); }
+
+.estimate-digits {
+  font-family: 'Tiempos Headline', serif;
+  font-size: 3.6rem;
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255,255,255,0.15);
+  letter-spacing: -0.02em;
+  transition: color 0.4s;
+  white-space: nowrap;
+}
+.estimate-digits.active { color: #ffffff; }
+
+.estimate-subtext {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.4;
+  margin-bottom: 16px;
+  position: relative; z-index: 1;
+  min-height: 20px;
+  transition: opacity 0.3s;
+}
+.estimate-subtext.has-value { color: rgba(255,255,255,0.6); }
+
+/* Confidence track */
+.confidence-wrap {
+  position: relative; z-index: 1;
+}
+.confidence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.confidence-label {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.confidence-value {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 500;
+  transition: color 0.4s;
+}
+.confidence-value.high { color: #5EEAD4; }
+.confidence-value.medium { color: #FCD34D; }
+.confidence-value.low { color: rgba(255,255,255,0.35); }
+
+.confidence-track {
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.confidence-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--teal);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0%;
+}
+
+/* ── SECTION CARDS ── */
+.section {
+  background: var(--white);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.section.is-empty {
+  border-style: dashed;
+  border-color: #CBD5E1;
+}
+.section.is-filled {
+  border-color: var(--border);
+}
+.section.is-active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,114,206,0.08);
+}
+
+/* Section tap target */
+.section-tap {
+  padding: 16px 16px 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.section-tap:hover { background: #FAFBFD; }
+.section.is-empty .section-tap:hover { background: #F8FAFC; }
+
+/* Section icon */
+.section-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.icon-empty    { background: #F1F5F9; }
+.icon-filled   { background: var(--blue-light); }
+.icon-warn     { background: var(--warn-bg); }
+
+/* Section content */
+.section-content { flex: 1; min-width: 0; }
+.section-eyebrow {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--soft);
+  margin-bottom: 2px;
+}
+.section-title {
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.section-title.placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+.section-meta {
+  font-size: 0.74rem;
+  color: var(--mid);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Section action */
+.section-action {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.action-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--blue-light);
+  border: none;
+  border-radius: 20px;
+  padding: 5px 11px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.action-btn:hover { background: #d6e9f8; }
+.action-btn.add {
+  background: var(--navy);
+  color: #fff;
+}
+.action-btn.add:hover { background: var(--navy-deep); }
+
+/* Coverage status badge */
+.status-badge {
+  font-size: 0.67rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.sb-covered    { background: var(--success-bg); color: var(--success); }
+.sb-restricted { background: var(--restricted-bg); color: var(--restricted); }
+.sb-excluded   { background: var(--error-bg); color: var(--error); }
+.sb-nogap      { background: var(--success-bg); color: var(--success); }
+.sb-contracted { background: #EFF6FF; color: #2563EB; }
+.sb-unknown    { background: #F3F4F6; color: var(--mid); }
+
+/* ── EXPANDED SECTION BODY ── */
+.section-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-top: 0px solid var(--border);
+}
+.section.expanded .section-body {
+  max-height: 1000px;
+  border-top-width: 1px;
+}
+.section-body-inner {
+  padding: 14px 16px;
+}
+
+/* Empty state body */
+.empty-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.empty-explain {
+  font-size: 0.8rem;
+  color: var(--mid);
+  line-height: 1.6;
+  padding: 12px 14px;
+  background: #F8FAFC;
+  border-radius: var(--radius-xs);
+  border: 1.5px solid var(--border);
+}
+.empty-explain strong { color: var(--ink); }
+
+.why-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.why-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.79rem;
+  line-height: 1.5;
+}
+.why-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0px;
+}
+.wd-blue  { background: var(--blue-light); color: var(--blue); }
+.wd-teal  { background: var(--teal-dim); color: var(--teal); }
+.wd-warn  { background: var(--warn-bg); color: var(--warn); }
+.why-text { color: var(--mid); }
+.why-text strong { color: var(--ink); }
+
+.empty-cta-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.empty-cta {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-xs);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: center;
+}
+.ecta-primary {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+}
+.ecta-primary:hover { background: var(--navy-deep); }
+.ecta-secondary {
+  background: none;
+  color: var(--navy);
+  border: 1.5px solid #CBD5E1;
+}
+.ecta-secondary:hover { border-color: var(--navy); }
+
+/* Filled proc rows */
+.proc-list { display: flex; flex-direction: column; gap: 7px; }
+.proc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--radius-xs);
+  border: 1.5px solid var(--border);
+  background: #FAFBFC;
+}
+.proc-item-icon {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.pi-covered    { background: var(--success-bg); color: var(--success); }
+.pi-restricted { background: var(--restricted-bg); color: var(--restricted); }
+.pi-excluded   { background: var(--error-bg); color: var(--error); }
+.proc-item-info { flex: 1; min-width: 0; }
+.proc-item-name { font-size: 0.84rem; font-weight: 500; }
+.proc-item-code { font-size: 0.71rem; color: var(--mid); margin-top: 1px; }
+
+/* Provider rows */
+.prov-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.prov-row:last-child { border-bottom: none; padding-bottom: 0; }
+.prov-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.prov-info { flex: 1; min-width: 0; }
+.prov-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--soft); font-weight: 500; margin-bottom: 1px; }
+.prov-name { font-size: 0.87rem; font-weight: 500; }
+.prov-name.empty { color: var(--soft); font-weight: 400; font-style: italic; }
+.prov-sub { font-size: 0.72rem; color: var(--mid); margin-top: 1px; }
+.prov-change { font-size: 0.72rem; color: var(--blue); font-weight: 500; cursor: pointer; padding: 3px 6px; border-radius: 5px; }
+.prov-change:hover { background: var(--blue-light); }
+
+/* Impact chip — shows in section meta when filled */
+.impact-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.69rem; font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.ic-good    { background: var(--success-bg); color: var(--success); }
+.ic-warn    { background: var(--warn-bg); color: var(--warn); }
+.ic-neutral { background: #F3F4F6; color: var(--mid); }
+
+/* ── BOTTOM CTA ── */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: linear-gradient(to top, var(--warm) 70%, transparent);
+  padding: 12px 16px 28px;
+}
+.bottom-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.97rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: -0.01em;
+}
+.bottom-btn:hover { background: var(--navy-deep); }
+.bottom-btn:disabled {
+  background: #CBD5E1;
+  cursor: default;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(17,24,39,0.92);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+  z-index: 200;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── RESET BUTTON (dev) ── */
+.reset-bar {
+  position: fixed;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  pointer-events: none;
+}
+.reset-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--mid);
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  pointer-events: all;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s;
+}
+.reset-btn:hover { border-color: var(--mid); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page > * {
+  animation: fadeUp 0.35s ease both;
+}
+.page > *:nth-child(1) { animation-delay: 0.05s; }
+.page > *:nth-child(2) { animation-delay: 0.12s; }
+.page > *:nth-child(3) { animation-delay: 0.18s; }
+.page > *:nth-child(4) { animation-delay: 0.24s; }
+.page > *:nth-child(5) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="nav-back">←</button>
+  <span class="nav-title">Cost Estimate</span>
+  <div class="nav-avatar">J</div>
+</nav>
+
+<div class="reset-bar">
+  <button class="reset-btn" onclick="resetAll()">↩ Reset</button>
+</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="policy-pill">
+      <span class="policy-pill-dot"></span>
+      <span class="policy-pill-text">Silver Hospital</span>
+      <span class="policy-pill-excess">$500 excess</span>
+    </div>
+    <div class="estimate-label">Estimated cost to you</div>
+    <div class="estimate-amount-wrap">
+      <span class="estimate-currency" id="currency">$</span>
+      <span class="estimate-digits" id="digits">—</span>
+    </div>
+    <div class="estimate-subtext" id="subtext">Add your procedure to start your estimate</div>
+    <div class="confidence-wrap">
+      <div class="confidence-header">
+        <span class="confidence-label">Estimate confidence</span>
+        <span class="confidence-value" id="conf-label">—</span>
+      </div>
+      <div class="confidence-track">
+        <div class="confidence-fill" id="conf-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: PROCEDURE -->
+  <div class="section is-empty" id="sec-proc">
+    <div class="section-tap" onclick="handleSection('proc')">
+      <div class="section-icon icon-empty" id="icon-proc">🔬</div>
+      <div class="section-content">
+        <div class="section-eyebrow">Step 1</div>
+        <div class="section-title placeholder" id="title-proc">Add your procedure</div>
+        <div class="section-meta" id="meta-proc">
+          <span>Enter procedure name or MBS code</span>
+        </div>
+      </div>
+      <div class="section-action">
+        <button class="action-btn add" id="btn-proc">Add ＋</button>
+      </div>
+    </div>
+    <div class="section-body" id="body-proc">
+      <div class="section-body-inner">
+        <div class="empty-body">
+          <div class="empty-explain">
+            Your hospital cover is organised into <strong>clinical categories</strong>. Your procedure determines which category applies — and whether it's covered, restricted, or excluded on Silver Hospital.
+          </div>
+          <div class="why-items">
+            <div class="why-item">
+              <span class="why-dot wd-blue">1</span>
+              <span class="why-text">We check your procedure falls within a <strong>covered clinical category</strong> on Silver</span>
+            </div>
+            <div class="why-item">
+              <span class="why-dot wd-teal">2</span>
+              <span class="why-text">We confirm your <strong>waiting period status</strong> for that category</span>
+            </div>
+            <div class="why-item">
+              <span class="why-dot wd-warn">3</span>
+              <span class="why-text">We apply your <strong>$500 excess</strong> — once per admission, not per item code</span>
+            </div>
+          </div>
+          <div class="empty-cta-row">
+            <button class="empty-cta ecta-primary" onclick="simulateFill('proc')">Search procedures</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: SPECIALIST -->
+  <div class="section is-empty" id="sec-spec">
+    <div class="section-tap" onclick="handleSection('spec')">
+      <div class="section-icon icon-empty" id="icon-spec">👤</div>
+      <div class="section-content">
+        <div class="section-eyebrow">Step 2</div>
+        <div class="section-title placeholder" id="title-spec">Add your specialist</div>
+        <div class="section-meta" id="meta-spec">
+          <span>Gap arrangement affects your cost</span>
+        </div>
+      </div>
+      <div class="section-action">
+        <button class="action-btn add" id="btn-spec">Add ＋</button>
+      </div>
+    </div>
+    <div class="section-body" id="body-spec">
+      <div class="section-body-inner">
+        <div class="empty-body">
+          <div class="empty-explain">
+            Your specialist's billing arrangement is one of the biggest cost variables. Three types exist:
+          </div>
+          <div class="why-items">
+            <div class="why-item">
+              <span class="why-dot wd-teal">✓</span>
+              <span class="why-text"><strong>No-gap</strong> — specialist charges at the agreed rate. No specialist fee out of pocket.</span>
+            </div>
+            <div class="why-item">
+              <span class="why-dot wd-warn">!</span>
+              <span class="why-text"><strong>Known-gap</strong> — a fixed fee above the MBS rate. Ask their rooms for the amount.</span>
+            </div>
+            <div class="why-item">
+              <span class="why-dot wd-blue">?</span>
+              <span class="why-text"><strong>No arrangement</strong> — can charge above MBS at their discretion. Gap is your full cost.</span>
+            </div>
+          </div>
+          <div class="empty-cta-row">
+            <button class="empty-cta ecta-primary" onclick="simulateFill('spec')">Search specialists</button>
+            <button class="empty-cta ecta-secondary" onclick="skipSection('spec')">Not chosen yet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: HOSPITAL -->
+  <div class="section is-empty" id="sec-hosp">
+    <div class="section-tap" onclick="handleSection('hosp')">
+      <div class="section-icon icon-empty" id="icon-hosp">🏥</div>
+      <div class="section-content">
+        <div class="section-eyebrow">Step 3</div>
+        <div class="section-title placeholder" id="title-hosp">Add your hospital</div>
+        <div class="section-meta" id="meta-hosp">
+          <span>Contracted status affects facility costs</span>
+        </div>
+      </div>
+      <div class="section-action">
+        <button class="action-btn add" id="btn-hosp">Add ＋</button>
+      </div>
+    </div>
+    <div class="section-body" id="body-hosp">
+      <div class="section-body-inner">
+        <div class="empty-body">
+          <div class="empty-explain">
+            Whether your hospital has a contract with Bupa determines how facility costs are covered.
+          </div>
+          <div class="why-items">
+            <div class="why-item">
+              <span class="why-dot wd-teal">✓</span>
+              <span class="why-text"><strong>Contracted</strong> — Bupa covers accommodation and theatre at agreed rates. No facility gap.</span>
+            </div>
+            <div class="why-item">
+              <span class="why-dot wd-warn">!</span>
+              <span class="why-text"><strong>Non-contracted</strong> — Bupa pays a default benefit. The gap to the actual charge is your cost — and can reach thousands.</span>
+            </div>
+          </div>
+          <div class="empty-cta-row">
+            <button class="empty-cta ecta-primary" onclick="simulateFill('hosp')">Search hospitals</button>
+            <button class="empty-cta ecta-secondary" onclick="skipSection('hosp')">Not chosen yet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="bottom-bar">
+  <button class="bottom-btn" id="bottom-btn" disabled>Add a procedure to continue</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  proc: null,   // null | 'filled'
+  spec: null,   // null | 'filled' | 'skipped'
+  hosp: null,   // null | 'filled' | 'skipped'
+  expanded: null,   // which section is open
+};
+
+// ─── FILL DATA (simulated) ────────────────────────────────────────────────────
+const FILL = {
+  proc: {
+    title: 'Knee reconstruction',
+    meta: null, // built dynamically
+    procedures: [
+      { name: 'Knee reconstruction', code: '49518', status: 'covered' },
+      { name: 'Arthroscopy of knee', code: '49503', status: 'covered' },
+      { name: 'Meniscus repair', code: '49527', status: 'restricted' },
+    ],
+    impactChip: { cls: 'ic-warn', label: '⚠ One restricted' },
+    cost: { low: 500, high: 1820 },    // without spec/hosp uncertainty
+    conf: 45,
+    confLabel: 'Low',
+    confCls: 'low',
+    subtext: '$500 excess · meniscus repair restricted benefit gap unknown',
+  },
+  spec: {
+    title: 'Dr Sarah Chen',
+    metaText: 'Orthopaedic Surgeon · North Sydney',
+    badge: { cls: 'sb-nogap', label: 'No-gap' },
+    impactChip: { cls: 'ic-good', label: '✓ No specialist gap' },
+    costDelta: 0,   // no-gap means specialist adds $0
+    confBonus: 25,
+    confLabel: 'Medium',
+    confCls: 'medium',
+    subtext: '$500 excess · meniscus repair restricted benefit gap $580–$1,320',
+  },
+  hosp: {
+    title: 'Mater Hospital',
+    metaText: 'Private · North Sydney',
+    badge: { cls: 'sb-contracted', label: 'Contracted' },
+    impactChip: { cls: 'ic-good', label: '✓ No facility gap' },
+    costDelta: 0,  // contracted = no facility gap added
+    confBonus: 20,
+    confLabel: 'High',
+    confCls: 'high',
+    subtext: '$500 excess · meniscus repair gap $580–$1,320 · no-gap specialist · contracted hospital',
+  },
+};
+
+// ─── ESTIMATE STATES ──────────────────────────────────────────────────────────
+// Driven by what's been filled
+function getEstimate() {
+  if (!state.proc) return { display: '—', subtext: 'Add your procedure to start your estimate', conf: 0, confLabel: '—', confCls: 'low' };
+
+  const base = { low: 500, high: 1820 };  // proc only, spec & hosp unknown
+
+  if (state.proc && !state.spec && !state.hosp) {
+    return {
+      display: '$500 – $4,900+',
+      low: 500, high: 4900,
+      subtext: '$500 excess · specialist gap and hospital facility costs unknown',
+      conf: 20, confLabel: 'Low', confCls: 'low',
+    };
+  }
+  if (state.proc && state.spec === 'filled' && !state.hosp) {
+    return {
+      display: '$500 – $2,620',
+      low: 500, high: 2620,
+      subtext: '$500 excess · meniscus repair restricted gap $580–$1,320 · hospital contracted status unknown',
+      conf: 50, confLabel: 'Medium', confCls: 'medium',
+    };
+  }
+  if (state.proc && state.spec === 'skipped' && !state.hosp) {
+    return {
+      display: '$500 – $6,200+',
+      low: 500, high: 6200,
+      subtext: '$500 excess · specialist gap unknown · hospital status unknown',
+      conf: 15, confLabel: 'Low', confCls: 'low',
+    };
+  }
+  if (state.proc && !state.spec && state.hosp === 'filled') {
+    return {
+      display: '$500 – $2,620',
+      low: 500, high: 2620,
+      subtext: '$500 excess · meniscus repair gap $580–$1,320 · contracted hospital · specialist gap unknown',
+      conf: 50, confLabel: 'Medium', confCls: 'medium',
+    };
+  }
+  if (state.proc && !state.spec && state.hosp === 'skipped') {
+    return {
+      display: '$500 – $6,200+',
+      low: 500, high: 6200,
+      subtext: '$500 excess · specialist and hospital costs both unknown',
+      conf: 15, confLabel: 'Low', confCls: 'low',
+    };
+  }
+  // All filled
+  if (state.proc && state.spec === 'filled' && state.hosp === 'filled') {
+    return {
+      display: '$1,080 – $1,820',
+      low: 1080, high: 1820,
+      subtext: '$500 excess · meniscus repair restricted benefit gap $580–$1,320 · no specialist gap · contracted hospital',
+      conf: 85, confLabel: 'High', confCls: 'high',
+    };
+  }
+  // Spec skipped, hosp filled
+  if (state.proc && state.spec === 'skipped' && state.hosp === 'filled') {
+    return {
+      display: '$500 – $3,820',
+      low: 500, high: 3820,
+      subtext: '$500 excess · meniscus repair gap $580–$1,320 · specialist gap unknown · contracted hospital',
+      conf: 55, confLabel: 'Medium', confCls: 'medium',
+    };
+  }
+  // Spec filled, hosp skipped
+  if (state.proc && state.spec === 'filled' && state.hosp === 'skipped') {
+    return {
+      display: '$500 – $4,120',
+      low: 500, high: 4120,
+      subtext: '$500 excess · meniscus repair gap $580–$1,320 · no specialist gap · hospital status unknown',
+      conf: 55, confLabel: 'Medium', confCls: 'medium',
+    };
+  }
+  return { display: '—', subtext: '', conf: 0, confLabel: '—', confCls: 'low' };
+}
+
+// ─── COUNTER ANIMATION ────────────────────────────────────────────────────────
+let animFrame = null;
+let currentDisplayedHigh = 0;
+
+function animateTo(targetDisplay, targetHigh) {
+  const digits = document.getElementById('digits');
+  const currency = document.getElementById('currency');
+
+  if (targetDisplay === '—') {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    digits.textContent = '—';
+    digits.classList.remove('active');
+    currency.classList.remove('active');
+    currentDisplayedHigh = 0;
+    return;
+  }
+
+  digits.classList.add('active');
+  currency.classList.add('active');
+
+  const start = currentDisplayedHigh;
+  const end = targetHigh;
+  const duration = 700;
+  let startTime = null;
+
+  // Parse the low end for range display
+  const parts = targetDisplay.split(' – ');
+  const hasRange = parts.length === 2;
+  const lowStr = hasRange ? parts[0] : '';
+  const highStr = hasRange ? parts[1] : targetDisplay.replace('$','');
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOut(progress);
+
+    const currentVal = Math.round(start + (end - start) * eased);
+
+    if (hasRange) {
+      const lowVal = parseInt(lowStr.replace('$','').replace(',','')) || 0;
+      const lowCurrent = Math.round(lowVal * eased);
+      // Format with commas
+      const fmtLow = '$' + lowCurrent.toLocaleString();
+      const fmtHigh = (highStr.includes('+'))
+        ? '$' + currentVal.toLocaleString() + '+'
+        : '$' + currentVal.toLocaleString();
+      digits.textContent = fmtLow + ' – ' + fmtHigh;
+      // Match font size to range length
+      if ((fmtLow + ' – ' + fmtHigh).length > 18) {
+        digits.style.fontSize = '2.2rem';
+      } else {
+        digits.style.fontSize = '3.6rem';
+      }
+    } else {
+      digits.textContent = '$' + currentVal.toLocaleString();
+      digits.style.fontSize = '3.6rem';
+    }
+
+    if (progress < 1) {
+      animFrame = requestAnimationFrame(step);
+    } else {
+      currentDisplayedHigh = end;
+      digits.textContent = targetDisplay;
+      // Final size check
+      if (targetDisplay.length > 18) {
+        digits.style.fontSize = '2.2rem';
+      } else if (targetDisplay.length > 12) {
+        digits.style.fontSize = '2.8rem';
+      } else {
+        digits.style.fontSize = '3.6rem';
+      }
+    }
+  }
+
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(step);
+}
+
+// ─── UPDATE HERO ──────────────────────────────────────────────────────────────
+function updateHero() {
+  const est = getEstimate();
+
+  animateTo(est.display, est.high || 0);
+
+  const subtext = document.getElementById('subtext');
+  subtext.textContent = est.subtext;
+  subtext.classList.toggle('has-value', !!state.proc);
+
+  const confFill = document.getElementById('conf-fill');
+  const confLabel = document.getElementById('conf-label');
+  confFill.style.width = est.conf + '%';
+  confLabel.textContent = est.confLabel;
+  confLabel.className = 'confidence-value ' + est.confCls;
+
+  // Bottom button
+  const btn = document.getElementById('bottom-btn');
+  if (!state.proc) {
+    btn.textContent = 'Add a procedure to continue';
+    btn.disabled = true;
+  } else if (!state.spec && !state.hosp) {
+    btn.textContent = 'Add specialist & hospital to refine';
+    btn.disabled = false;
+  } else {
+    btn.textContent = '📞 Call 134 135 to confirm this estimate';
+    btn.disabled = false;
+  }
+}
+
+// ─── SECTION TOGGLE ───────────────────────────────────────────────────────────
+function handleSection(key) {
+  const sec = document.getElementById('sec-' + key);
+  const body = document.getElementById('body-' + key);
+
+  if (state.expanded === key) {
+    // Collapse
+    sec.classList.remove('expanded', 'is-active');
+    state.expanded = null;
+  } else {
+    // Collapse previous
+    if (state.expanded) {
+      document.getElementById('sec-' + state.expanded).classList.remove('expanded', 'is-active');
+    }
+    sec.classList.add('expanded', 'is-active');
+    state.expanded = key;
+    // scroll into view
+    setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+  }
+}
+
+// ─── SIMULATE FILL ────────────────────────────────────────────────────────────
+function simulateFill(key) {
+  state[key] = 'filled';
+  state.expanded = null;
+
+  if (key === 'proc') fillProc();
+  if (key === 'spec') fillSpec();
+  if (key === 'hosp') fillHosp();
+
+  updateHero();
+  showToast(key === 'proc' ? '3 procedures added' : key === 'spec' ? 'Dr Sarah Chen added' : 'Mater Hospital added');
+}
+
+function skipSection(key) {
+  state[key] = 'skipped';
+  state.expanded = null;
+
+  const sec = document.getElementById('sec-' + key);
+  sec.classList.remove('expanded', 'is-active', 'is-empty');
+  sec.classList.add('is-filled');
+
+  if (key === 'spec') {
+    document.getElementById('icon-spec').className = 'section-icon icon-empty';
+    document.getElementById('icon-spec').textContent = '👤';
+    document.getElementById('title-spec').textContent = 'Specialist not chosen';
+    document.getElementById('title-spec').classList.add('placeholder');
+    document.getElementById('meta-spec').innerHTML = '<span class="impact-chip ic-warn">⚠ Gap arrangement unknown</span>';
+    document.getElementById('btn-spec').textContent = 'Add';
+    document.getElementById('btn-spec').className = 'action-btn add';
+  }
+  if (key === 'hosp') {
+    document.getElementById('icon-hosp').className = 'section-icon icon-empty';
+    document.getElementById('icon-hosp').textContent = '🏥';
+    document.getElementById('title-hosp').textContent = 'Hospital not chosen';
+    document.getElementById('title-hosp').classList.add('placeholder');
+    document.getElementById('meta-hosp').innerHTML = '<span class="impact-chip ic-warn">⚠ Contracted status unknown</span>';
+    document.getElementById('btn-hosp').textContent = 'Add';
+    document.getElementById('btn-hosp').className = 'action-btn add';
+  }
+
+  updateHero();
+}
+
+function fillProc() {
+  const sec = document.getElementById('sec-proc');
+  sec.classList.remove('expanded', 'is-active', 'is-empty');
+  sec.classList.add('is-filled');
+
+  document.getElementById('icon-proc').className = 'section-icon icon-filled';
+  document.getElementById('icon-proc').textContent = '🔬';
+  document.getElementById('title-proc').textContent = 'Knee reconstruction +2';
+  document.getElementById('title-proc').classList.remove('placeholder');
+
+  document.getElementById('meta-proc').innerHTML = `
+    <span class="status-badge sb-covered">2 covered</span>
+    <span class="status-badge sb-restricted">1 restricted</span>
+  `;
+  document.getElementById('btn-proc').textContent = 'Edit';
+  document.getElementById('btn-proc').className = 'action-btn';
+
+  // Rebuild body with filled content
+  document.getElementById('body-proc').innerHTML = `
+    <div class="section-body-inner">
+      <div class="proc-list">
+        <div class="proc-item">
+          <div class="proc-item-icon pi-covered">✓</div>
+          <div class="proc-item-info">
+            <div class="proc-item-name">Knee reconstruction</div>
+            <div class="proc-item-code">MBS 49518 · Bone, joint &amp; muscle</div>
+          </div>
+          <span class="status-badge sb-covered">Covered</span>
+        </div>
+        <div class="proc-item">
+          <div class="proc-item-icon pi-covered">✓</div>
+          <div class="proc-item-info">
+            <div class="proc-item-name">Arthroscopy of knee</div>
+            <div class="proc-item-code">MBS 49503 · Bone, joint &amp; muscle</div>
+          </div>
+          <span class="status-badge sb-covered">Covered</span>
+        </div>
+        <div class="proc-item" style="border-color:#DDD6FE">
+          <div class="proc-item-icon pi-restricted">⚠</div>
+          <div class="proc-item-info">
+            <div class="proc-item-name">Meniscus repair</div>
+            <div class="proc-item-code">MBS 49527 · restricted on Silver — gap applies at private hospital</div>
+          </div>
+          <span class="status-badge sb-restricted">Restricted</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function fillSpec() {
+  const sec = document.getElementById('sec-spec');
+  sec.classList.remove('expanded', 'is-active', 'is-empty');
+  sec.classList.add('is-filled');
+
+  document.getElementById('icon-spec').className = 'section-icon icon-filled';
+  document.getElementById('icon-spec').textContent = '👤';
+  document.getElementById('title-spec').textContent = 'Dr Sarah Chen';
+  document.getElementById('title-spec').classList.remove('placeholder');
+  document.getElementById('meta-spec').innerHTML = `
+    <span>Orthopaedic Surgeon · North Sydney</span>
+    <span class="impact-chip ic-good">✓ No-gap</span>
+  `;
+  document.getElementById('btn-spec').textContent = 'Change';
+  document.getElementById('btn-spec').className = 'action-btn';
+
+  document.getElementById('body-spec').innerHTML = `
+    <div class="section-body-inner">
+      <div class="prov-row">
+        <div class="prov-icon" style="background:#EDE9FE">👤</div>
+        <div class="prov-info">
+          <div class="prov-label">Specialist</div>
+          <div class="prov-name">Dr Sarah Chen</div>
+          <div class="prov-sub">Orthopaedic Surgeon · North Sydney · MBBS FRACS</div>
+        </div>
+        <span class="status-badge sb-nogap">No-gap</span>
+      </div>
+      <div style="padding:10px 0 2px; font-size:0.78rem; color:var(--mid); line-height:1.55;">
+        Dr Chen has a <strong style="color:var(--ink)">no-gap arrangement</strong> with Bupa — she charges at the agreed rate, so you pay no specialist fee out of pocket for your covered procedures.
+      </div>
+    </div>`;
+}
+
+function fillHosp() {
+  const sec = document.getElementById('sec-hosp');
+  sec.classList.remove('expanded', 'is-active', 'is-empty');
+  sec.classList.add('is-filled');
+
+  document.getElementById('icon-hosp').className = 'section-icon icon-filled';
+  document.getElementById('icon-hosp').textContent = '🏥';
+  document.getElementById('title-hosp').textContent = 'Mater Hospital';
+  document.getElementById('title-hosp').classList.remove('placeholder');
+  document.getElementById('meta-hosp').innerHTML = `
+    <span>Private · North Sydney</span>
+    <span class="impact-chip ic-good">✓ Contracted</span>
+  `;
+  document.getElementById('btn-hosp').textContent = 'Change';
+  document.getElementById('btn-hosp').className = 'action-btn';
+
+  document.getElementById('body-hosp').innerHTML = `
+    <div class="section-body-inner">
+      <div class="prov-row">
+        <div class="prov-icon" style="background:#DCFCE7">🏥</div>
+        <div class="prov-info">
+          <div class="prov-label">Hospital</div>
+          <div class="prov-name">Mater Hospital</div>
+          <div class="prov-sub">Private · North Sydney NSW 2060</div>
+        </div>
+        <span class="status-badge sb-contracted">Contracted</span>
+      </div>
+      <div style="padding:10px 0 2px; font-size:0.78rem; color:var(--mid); line-height:1.55;">
+        Mater Hospital has a <strong style="color:var(--ink)">contracted agreement</strong> with Bupa. Accommodation and theatre fees are covered at agreed rates — no facility gap.
+      </div>
+    </div>`;
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─── RESET ────────────────────────────────────────────────────────────────────
+function resetAll() {
+  state.proc = null; state.spec = null; state.hosp = null; state.expanded = null;
+  currentDisplayedHigh = 0;
+
+  // Reset all sections
+  ['proc','spec','hosp'].forEach(k => {
+    const sec = document.getElementById('sec-' + k);
+    sec.className = 'section is-empty';
+  });
+
+  // Proc
+  document.getElementById('icon-proc').className = 'section-icon icon-empty';
+  document.getElementById('icon-proc').textContent = '🔬';
+  document.getElementById('title-proc').textContent = 'Add your procedure';
+  document.getElementById('title-proc').className = 'section-title placeholder';
+  document.getElementById('meta-proc').innerHTML = '<span>Enter procedure name or MBS code</span>';
+  document.getElementById('btn-proc').textContent = 'Add ＋';
+  document.getElementById('btn-proc').className = 'action-btn add';
+  document.getElementById('body-proc').innerHTML = `<div class="section-body-inner"><div class="empty-body">
+    <div class="empty-explain">Your hospital cover is organised into <strong>clinical categories</strong>. Your procedure determines which category applies — and whether it's covered, restricted, or excluded on Silver Hospital.</div>
+    <div class="why-items">
+      <div class="why-item"><span class="why-dot wd-blue">1</span><span class="why-text">We check your procedure falls within a <strong>covered clinical category</strong> on Silver</span></div>
+      <div class="why-item"><span class="why-dot wd-teal">2</span><span class="why-text">We confirm your <strong>waiting period status</strong> for that category</span></div>
+      <div class="why-item"><span class="why-dot wd-warn">3</span><span class="why-text">We apply your <strong>$500 excess</strong> — once per admission, not per item code</span></div>
+    </div>
+    <div class="empty-cta-row"><button class="empty-cta ecta-primary" onclick="simulateFill('proc')">Search procedures</button></div>
+  </div></div>`;
+
+  // Spec
+  document.getElementById('icon-spec').className = 'section-icon icon-empty';
+  document.getElementById('icon-spec').textContent = '👤';
+  document.getElementById('title-spec').textContent = 'Add your specialist';
+  document.getElementById('title-spec').className = 'section-title placeholder';
+  document.getElementById('meta-spec').innerHTML = '<span>Gap arrangement affects your cost</span>';
+  document.getElementById('btn-spec').textContent = 'Add ＋';
+  document.getElementById('btn-spec').className = 'action-btn add';
+  document.getElementById('body-spec').innerHTML = `<div class="section-body-inner"><div class="empty-body">
+    <div class="empty-explain">Your specialist's billing arrangement is one of the biggest cost variables. Three types exist:</div>
+    <div class="why-items">
+      <div class="why-item"><span class="why-dot wd-teal">✓</span><span class="why-text"><strong>No-gap</strong> — specialist charges at the agreed rate. No specialist fee out of pocket.</span></div>
+      <div class="why-item"><span class="why-dot wd-warn">!</span><span class="why-text"><strong>Known-gap</strong> — a fixed fee above the MBS rate. Ask their rooms for the amount.</span></div>
+      <div class="why-item"><span class="why-dot wd-blue">?</span><span class="why-text"><strong>No arrangement</strong> — can charge above MBS at their discretion. Gap is your full cost.</span></div>
+    </div>
+    <div class="empty-cta-row">
+      <button class="empty-cta ecta-primary" onclick="simulateFill('spec')">Search specialists</button>
+      <button class="empty-cta ecta-secondary" onclick="skipSection('spec')">Not chosen yet</button>
+    </div>
+  </div></div>`;
+
+  // Hosp
+  document.getElementById('icon-hosp').className = 'section-icon icon-empty';
+  document.getElementById('icon-hosp').textContent = '🏥';
+  document.getElementById('title-hosp').textContent = 'Add your hospital';
+  document.getElementById('title-hosp').className = 'section-title placeholder';
+  document.getElementById('meta-hosp').innerHTML = '<span>Contracted status affects facility costs</span>';
+  document.getElementById('btn-hosp').textContent = 'Add ＋';
+  document.getElementById('btn-hosp').className = 'action-btn add';
+  document.getElementById('body-hosp').innerHTML = `<div class="section-body-inner"><div class="empty-body">
+    <div class="empty-explain">Whether your hospital has a contract with Bupa determines how facility costs are covered.</div>
+    <div class="why-items">
+      <div class="why-item"><span class="why-dot wd-teal">✓</span><span class="why-text"><strong>Contracted</strong> — Bupa covers accommodation and theatre at agreed rates. No facility gap.</span></div>
+      <div class="why-item"><span class="why-dot wd-warn">!</span><span class="why-text"><strong>Non-contracted</strong> — Bupa pays a default benefit. The gap to the actual charge is your cost — and can reach thousands.</span></div>
+    </div>
+    <div class="empty-cta-row">
+      <button class="empty-cta ecta-primary" onclick="simulateFill('hosp')">Search hospitals</button>
+      <button class="empty-cta ecta-secondary" onclick="skipSection('hosp')">Not chosen yet</button>
+    </div>
+  </div></div>`;
+
+  // Hero
+  const digits = document.getElementById('digits');
+  digits.textContent = '—';
+  digits.classList.remove('active');
+  digits.style.fontSize = '3.6rem';
+  document.getElementById('currency').classList.remove('active');
+  document.getElementById('subtext').textContent = 'Add your procedure to start your estimate';
+  document.getElementById('subtext').classList.remove('has-value');
+  document.getElementById('conf-fill').style.width = '0%';
+  document.getElementById('conf-label').textContent = '—';
+  document.getElementById('conf-label').className = 'confidence-value low';
+
+  document.getElementById('bottom-btn').textContent = 'Add a procedure to continue';
+  document.getElementById('bottom-btn').disabled = true;
+}
+
+// Init
+updateHero();
+</script>
+</body>
+</html>

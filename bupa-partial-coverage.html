@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bupa – Your Estimate</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiempos+Headline:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --navy:#003087; --blue:#0072CE; --light-blue:#E8F1FB;
+  --teal:#00A3A1; --warm:#F7F5F2; --ink:#1A1A2E; --mid:#6B7280;
+  --border:#DDE3EC;
+  --success:#00856F; --success-bg:#D1FAE5;
+  --warn:#B45309; --warn-bg:#FEF3C7;
+  --error:#B91C1C; --error-bg:#FEE2E2;
+  --restricted:#6D28D9; --restricted-bg:#EDE9FE;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 2px 12px rgba(0,48,135,0.08);
+}
+body { font-family:'DM Sans',sans-serif; background:var(--warm); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+
+/* ── SWITCHER ── */
+.switcher-bar { position:fixed; top:0; left:0; right:0; z-index:300; background:var(--ink); padding:10px 16px; display:flex; align-items:center; gap:10px; box-shadow:0 2px 16px rgba(0,0,0,0.35); }
+.switcher-label { font-size:0.7rem; font-weight:600; letter-spacing:0.09em; text-transform:uppercase; color:rgba(255,255,255,0.45); flex-shrink:0; }
+.switcher-select { flex:1; padding:8px 28px 8px 12px; border-radius:8px; border:1.5px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.07); color:#fff; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.45)' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
+.switcher-select option, .switcher-select optgroup { background:#1A1A2E; }
+
+/* ── NAV ── */
+nav { width:100%; background:#fff; border-bottom:1px solid var(--border); padding:0 20px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:52px; z-index:200; }
+.nav-back { font-size:0.85rem; color:var(--blue); font-weight:500; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.nav-logo { font-family:'Tiempos Headline',serif; font-size:1.3rem; color:var(--navy); display:flex; align-items:center; gap:7px; }
+.nav-logo svg { width:26px; height:26px; }
+.nav-avatar { width:32px; height:32px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:600; }
+
+/* ── PAGE ── */
+.page { width:100%; max-width:480px; padding:0 20px 120px; margin-top:52px; }
+
+/* ── HERO ── */
+.estimate-hero { background:linear-gradient(150deg,#002070 0%,var(--navy) 55%,#004db8 100%); border-radius:0 0 28px 28px; padding:20px 20px 24px; color:#fff; margin:0 -20px 16px; position:relative; overflow:hidden; }
+.estimate-hero::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.03); }
+.estimate-hero::after  { content:''; position:absolute; bottom:-30px; left:20px; width:120px; height:120px; border-radius:50%; background:rgba(0,163,161,0.1); }
+
+/* Policy badge row */
+.hero-policy-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; position:relative; z-index:1; }
+.policy-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.18);
+  border-radius:20px; padding:4px 10px 4px 8px;
+  font-size:0.73rem; font-weight:500; letter-spacing:0.01em;
+}
+.policy-badge-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.policy-badge-label { opacity:0.9; }
+.policy-context { font-size:0.7rem; opacity:0.45; }
+
+.hero-cost-label { font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; opacity:0.6; margin-bottom:5px; position:relative; z-index:1; }
+.hero-cost-amount { font-family:'Tiempos Headline',serif; font-size:2.8rem; font-weight:400; line-height:1; margin-bottom:5px; position:relative; z-index:1; }
+.hero-cost-amount.dim { opacity:0.3; font-size:2rem; }
+.hero-cost-note { font-size:0.8rem; opacity:0.65; line-height:1.4; margin-bottom:16px; position:relative; z-index:1; }
+
+/* Confidence bar */
+.conf-wrap { position:relative; z-index:1; }
+.conf-row { display:flex; justify-content:space-between; font-size:0.7rem; opacity:0.5; margin-bottom:5px; }
+.conf-track { height:4px; background:rgba(255,255,255,0.12); border-radius:2px; overflow:hidden; }
+.conf-fill { height:100%; border-radius:2px; background:var(--teal); transition:width 0.5s; }
+
+/* Issues strip */
+.hero-issues { margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:6px; position:relative; z-index:1; }
+.hero-issue-row { display:flex; align-items:flex-start; gap:8px; font-size:0.78rem; line-height:1.4; opacity:0.88; }
+.issue-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.issue-dot.restricted { background:#C4B5FD; }
+.issue-dot.excluded   { background:#FCA5A5; }
+.issue-dot.missing    { background:#FDE68A; }
+
+/* Upgrade nudge — subtle, inside hero */
+.upgrade-nudge {
+  margin-top:12px; padding:10px 12px; border-radius:10px;
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14);
+  display:flex; align-items:center; gap:10px;
+  cursor:pointer; position:relative; z-index:1;
+  transition:background 0.15s;
+}
+.upgrade-nudge:hover { background:rgba(255,255,255,0.11); }
+.upgrade-nudge-body { flex:1; }
+.upgrade-nudge-label { font-size:0.68rem; letter-spacing:0.07em; text-transform:uppercase; opacity:0.5; margin-bottom:2px; }
+.upgrade-nudge-text { font-size:0.78rem; opacity:0.85; line-height:1.35; }
+.upgrade-nudge-arrow { font-size:0.8rem; opacity:0.5; flex-shrink:0; }
+
+.hero-disclaimer { margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); font-size:0.69rem; opacity:0.4; line-height:1.5; position:relative; z-index:1; }
+
+/* ── NO HOSPITAL COVER ALERT (full page) ── */
+.cover-warning {
+  margin:0 -20px 16px; padding:20px;
+  background:#FFF7ED; border-bottom:2px solid #F97316;
+  display:flex; gap:14px; align-items:flex-start;
+}
+.cover-warning-icon { font-size:1.6rem; flex-shrink:0; margin-top:2px; }
+.cover-warning-body { flex:1; }
+.cover-warning-title { font-family:'Tiempos Headline',serif; font-size:1.1rem; color:#7C2D12; margin-bottom:6px; }
+.cover-warning-text { font-size:0.83rem; color:#92400E; line-height:1.55; margin-bottom:14px; }
+.cover-warning-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; background:#7C2D12; color:#fff; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; cursor:pointer; margin-bottom:8px; width:100%; justify-content:center; }
+.cover-warning-btn:hover { background:#6B2510; }
+.cover-warning-link { font-size:0.8rem; color:#92400E; text-decoration:underline; text-underline-offset:2px; cursor:pointer; display:block; text-align:center; }
+
+/* ── SECTION CARDS ── */
+.section-card { background:#fff; border:1.5px solid var(--border); border-radius:var(--radius); margin-bottom:10px; overflow:hidden; transition:border-color 0.2s, box-shadow 0.2s; }
+.section-card.open { border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,114,206,0.09),var(--shadow); }
+.section-card.empty-card { border-style:dashed; border-color:#CBD5E1; }
+.section-head { padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; user-select:none; }
+.section-head-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.section-head-content { flex:1; min-width:0; }
+.section-head-label { font-size:0.7rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--mid); margin-bottom:2px; }
+.section-head-summary { font-size:0.9rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.section-head-summary.empty-text { color:var(--mid); font-weight:400; font-style:italic; }
+.section-head-meta { font-size:0.75rem; color:var(--mid); margin-top:1px; }
+.section-toggle { display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:500; color:var(--blue); background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; padding:4px 8px; border-radius:6px; transition:background 0.15s; flex-shrink:0; }
+.section-toggle:hover { background:var(--light-blue); }
+.toggle-arrow { font-size:0.65rem; transition:transform 0.25s; display:inline-block; }
+.section-card.open .toggle-arrow { transform:rotate(180deg); }
+.section-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; border-top:0 solid var(--border); }
+.section-card.open .section-body { max-height:2000px; border-top-width:1px; }
+.section-body-inner { padding:14px 16px; }
+
+/* ── PROCEDURE ROWS ── */
+.proc-status-bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+.proc-status-pill { display:flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:0.73rem; font-weight:500; }
+.pill-covered    { background:var(--success-bg); color:var(--success); }
+.pill-restricted { background:var(--restricted-bg); color:var(--restricted); }
+.pill-excluded   { background:var(--error-bg); color:var(--error); }
+.proc-row { border:1.5px solid var(--border); border-radius:var(--radius-sm); margin-bottom:8px; overflow:hidden; }
+.proc-row.covered    { border-left:3px solid var(--success); }
+.proc-row.restricted { border-left:3px solid var(--restricted); }
+.proc-row.excluded   { border-left:3px solid var(--error); }
+.proc-row-head { padding:11px 12px; display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+.proc-row-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; flex-shrink:0; }
+.row-icon-covered    { background:var(--success-bg); color:var(--success); }
+.row-icon-restricted { background:var(--restricted-bg); color:var(--restricted); }
+.row-icon-excluded   { background:var(--error-bg); color:var(--error); }
+.proc-row-info { flex:1; min-width:0; }
+.proc-row-name { font-size:0.87rem; font-weight:500; }
+.proc-row-code { font-size:0.72rem; color:var(--mid); margin-top:1px; }
+.proc-row-badge { font-size:0.68rem; font-weight:600; padding:3px 8px; border-radius:20px; flex-shrink:0; white-space:nowrap; }
+.rbadge-covered    { background:var(--success-bg); color:var(--success); }
+.rbadge-restricted { background:var(--restricted-bg); color:var(--restricted); }
+.rbadge-excluded   { background:var(--error-bg); color:var(--error); }
+.proc-row-arrow { font-size:0.65rem; color:var(--mid); transition:transform 0.22s; flex-shrink:0; }
+.proc-row.open .proc-row-arrow { transform:rotate(180deg); }
+.proc-row-body { max-height:0; overflow:hidden; transition:max-height 0.32s ease; border-top:0 solid var(--border); }
+.proc-row.open .proc-row-body { max-height:600px; border-top-width:1px; }
+.proc-row-body-inner { padding:12px; background:#FAFBFC; }
+.proc-explanation { border-radius:8px; padding:10px 12px; font-size:0.8rem; line-height:1.55; margin-bottom:10px; }
+.proc-explanation.covered    { background:var(--success-bg); color:#065F46; }
+.proc-explanation.restricted { background:var(--restricted-bg); color:#4C1D95; }
+.proc-explanation.excluded   { background:var(--error-bg); color:#7F1D1D; }
+.proc-exp-title { font-weight:600; margin-bottom:4px; font-size:0.82rem; }
+.proc-points { display:flex; flex-direction:column; gap:8px; }
+.proc-point { display:flex; gap:8px; font-size:0.78rem; line-height:1.5; }
+.point-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.pdot-restricted { background:var(--restricted); }
+.pdot-excluded   { background:var(--error); }
+.proc-point-text { color:var(--mid); }
+.proc-point-text strong { color:var(--ink); }
+
+/* ── EMPTY STATE EDUCATION ── */
+.edu-block { border-radius:var(--radius-sm); background:#F8FAFC; border:1.5px solid #E2E8F0; padding:14px; }
+.edu-icon { font-size:1.5rem; display:block; margin-bottom:8px; }
+.edu-title { font-family:'Tiempos Headline',serif; font-size:0.97rem; color:var(--ink); margin-bottom:5px; }
+.edu-body { font-size:0.8rem; color:var(--mid); line-height:1.55; margin-bottom:12px; }
+.edu-points { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.edu-point { display:flex; gap:9px; font-size:0.79rem; line-height:1.45; }
+.edu-point-dot { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:700; flex-shrink:0; }
+.edot-blue  { background:var(--light-blue); color:var(--blue); }
+.edot-green { background:var(--success-bg); color:var(--success); }
+.edot-warn  { background:var(--warn-bg); color:var(--warn); }
+.edu-point-text { color:var(--mid); padding-top:1px; }
+.edu-point-text strong { color:var(--ink); }
+.edu-btn { width:100%; padding:11px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:500; cursor:pointer; transition:background 0.15s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.edu-btn.primary { background:var(--navy); color:#fff; border:none; margin-bottom:6px; }
+.edu-btn.primary:hover { background:#002070; }
+.edu-btn.secondary { background:none; border:1.5px solid var(--navy); color:var(--navy); }
+.edu-btn.secondary:hover { background:var(--light-blue); }
+
+/* ── PROVIDERS ── */
+.context-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.context-row:last-child { border-bottom:none; }
+.context-row-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+.context-row-info { flex:1; }
+.context-row-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--mid); font-weight:500; margin-bottom:1px; }
+.context-row-name { font-size:0.9rem; font-weight:500; }
+.context-row-name.empty-text { color:var(--mid); font-weight:400; font-style:italic; }
+.context-row-sub { font-size:0.74rem; color:var(--mid); margin-top:1px; }
+.ctx-badge { font-size:0.7rem; font-weight:600; padding:3px 8px; border-radius:20px; flex-shrink:0; }
+.ctx-btn { font-size:0.75rem; font-weight:500; color:var(--blue); background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; padding:4px 6px; border-radius:6px; flex-shrink:0; }
+.ctx-btn:hover { background:var(--light-blue); }
+.prov-empty-note { display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--border); }
+.prov-empty-note:last-child { border-bottom:none; }
+.prov-empty-icon { width:34px; height:34px; border-radius:9px; background:#F1F5F9; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+.prov-empty-body { flex:1; }
+.prov-empty-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--mid); font-weight:500; margin-bottom:3px; }
+.prov-empty-heading { font-size:0.87rem; font-weight:500; color:var(--ink); margin-bottom:4px; }
+.prov-empty-text { font-size:0.78rem; color:var(--mid); line-height:1.5; margin-bottom:8px; }
+.prov-empty-points { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+.prov-empty-point { display:flex; gap:7px; font-size:0.76rem; line-height:1.4; }
+.pep-dot { width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.62rem; font-weight:700; flex-shrink:0; margin-top:1px; }
+
+/* ── CTA CARD ── */
+.cta-card { background:#fff; border:1.5px solid var(--border); border-radius:var(--radius); padding:18px; margin-bottom:10px; }
+.cta-title { font-family:'Tiempos Headline',serif; font-size:1.05rem; color:var(--navy); margin-bottom:12px; }
+.cta-action { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+.cta-action:last-child { border-bottom:none; padding-bottom:0; }
+.cta-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.cta-info { flex:1; }
+.cta-label { font-size:0.88rem; font-weight:500; }
+.cta-sub { font-size:0.74rem; color:var(--mid); margin-top:1px; }
+.cta-arrow { color:var(--mid); font-size:0.8rem; }
+
+/* ── SCENARIO NOTE ── */
+.scenario-note { background:rgba(26,26,46,0.86); color:#fff; border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:14px; font-size:0.78rem; line-height:1.5; border-left:3px solid var(--teal); }
+.scenario-note strong { color:var(--teal); }
+
+/* ── BOTTOM ── */
+.bottom-bar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:linear-gradient(to top,var(--warm) 75%,transparent); padding:10px 20px 24px; }
+.btn-cta { width:100%; padding:15px; border:none; border-radius:var(--radius-sm); background:var(--navy); color:#fff; font-family:'DM Sans',sans-serif; font-size:0.97rem; font-weight:500; cursor:pointer; transition:background 0.2s; }
+.btn-cta:hover { background:#002070; }
+.btn-cta.warning { background:#7C2D12; }
+.btn-cta.warning:hover { background:#6B2510; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.page > * { animation:fadeUp 0.3s ease both; }
+.page > *:nth-child(2){animation-delay:.06s} .page > *:nth-child(3){animation-delay:.1s}
+.page > *:nth-child(4){animation-delay:.14s} .page > *:nth-child(5){animation-delay:.18s}
+.page > *:nth-child(6){animation-delay:.22s}
+</style>
+</head>
+<body>
+
+<div class="switcher-bar">
+  <span class="switcher-label">Scenario</span>
+  <select class="switcher-select" id="scenario-select" onchange="applyScenario(this.value)">
+    <optgroup label="─── Coverage states">
+      <option value="all-covered">✅  All covered — Silver Hospital baseline</option>
+      <option value="bronze-covered">✅  All covered — Bronze Plus Hospital</option>
+      <option value="one-restricted">🟣  One procedure restricted — Silver</option>
+      <option value="one-excluded">🔴  One procedure excluded — Silver</option>
+      <option value="mixed">🔴🟣✅  Mixed — Silver</option>
+    </optgroup>
+    <optgroup label="─── No hospital cover">
+      <option value="extras-only">⚠️  Extras only — no hospital cover held</option>
+    </optgroup>
+    <optgroup label="─── Missing inputs">
+      <option value="no-proc">❌  No procedures added</option>
+      <option value="no-spec">❌  No specialist selected</option>
+      <option value="no-hosp">❌  No hospital selected</option>
+      <option value="no-prov">❌  No specialist or hospital</option>
+    </optgroup>
+  </select>
+</div>
+
+<nav>
+  <button class="nav-back">← Back</button>
+  <div class="nav-logo">
+    <svg viewBox="0 0 26 26" fill="none">
+      <rect width="26" height="26" rx="6" fill="#003087"/>
+      <path d="M6 7h6.5a3.5 3.5 0 010 7H6V7z" fill="#fff" opacity="0.9"/>
+      <path d="M6 14h7a3.5 3.5 0 010 7H6v-7z" fill="#0072CE"/>
+    </svg>
+    Bupa
+  </div>
+  <div class="nav-avatar">J</div>
+</nav>
+
+<div class="page" id="main-page"></div>
+
+<div class="bottom-bar">
+  <button class="btn-cta" id="main-cta">📞 Call 134 135 to confirm costs</button>
+</div>
+
+<script>
+
+// ─── SHARED PROCEDURE DATA ────────────────────────────────────────────────────
+const PROC_KNEE = {
+  name:'Knee reconstruction', code:'49518', category:'Bone, joint & muscle', status:'covered',
+  exp:{ title:'✓ Covered on your hospital policy', body:'Falls under <strong>Bone, joint &amp; muscle</strong> — included on your plan. Bupa pays the agreed hospital benefit and MBS schedule fee. Your excess applies once for this admission.' }, points:null,
+};
+const PROC_ARTHROSCOPY = {
+  name:'Arthroscopy of knee', code:'49503', category:'Bone, joint & muscle', status:'covered',
+  exp:{ title:'✓ Covered — no additional excess', body:'Billed in the same admission as your knee reconstruction. The excess applies <strong>once per admission</strong>, not per item code — this adds nothing further to your cost.' }, points:null,
+};
+const PROC_MENISCUS = {
+  name:'Meniscus repair', code:'49527', category:'Bone, joint & muscle', status:'restricted',
+  exp:{ title:'⚠ Restricted benefit on your plan', body:'<strong>Restricted</strong> means the procedure is listed on your policy, but Bupa\'s benefit is capped at the <strong>public hospital rate</strong>. At a private hospital, the gap between that and the private rate is your cost — typically $580–$1,320.' },
+  points:[
+    { dot:'pdot-restricted', text:'<strong>Why restricted?</strong> MBS 49527 sits within Bone, joint &amp; muscle on your plan, but at a restricted tier. Full private cover for this item requires a higher-tier policy.' },
+    { dot:'pdot-restricted', text:'<strong>Reducing the gap:</strong> Ask the hospital whether they\'ll absorb this into a packaged admission with your knee reconstruction. Some contracted hospitals will.' },
+  ],
+};
+const PROC_SPINAL = {
+  name:'Spinal fusion', code:'51011', category:'Spinal surgery', status:'excluded',
+  exp:{ title:'✕ Not covered — Spinal surgery excluded from your plan', body:'<strong>Spinal surgery</strong> is not included on your current hospital cover. Bupa pays nothing — all hospital, theatre, and specialist fees are your cost.' },
+  points:[
+    { dot:'pdot-excluded', text:'<strong>Why excluded?</strong> Spinal surgery is a higher-tier clinical category not included on your current plan, as required by Australian Government regulation.' },
+    { dot:'pdot-excluded', text:'<strong>To get cover:</strong> Upgrading your hospital cover would include this category. A <strong>12-month waiting period</strong> applies from the upgrade date.' },
+    { dot:'pdot-excluded', text:'<strong>Public hospital option:</strong> Available at no cost under Medicare — wait times vary by state.' },
+  ],
+};
+
+// ─── POLICY DEFINITIONS ───────────────────────────────────────────────────────
+const POLICIES = {
+  silver: {
+    name: 'Silver Hospital',
+    tier: 'Silver',
+    dotColor: '#94A3B8',   // neutral slate — a mid tier
+    excess: '$500',
+    excessNum: 500,
+  },
+  bronzePlus: {
+    name: 'Bronze Plus Hospital',
+    tier: 'Bronze Plus',
+    dotColor: '#D97706',   // amber for bronze
+    excess: '$750',
+    excessNum: 750,
+  },
+};
+
+// ─── SCENARIOS ────────────────────────────────────────────────────────────────
+const SCENARIOS = {
+
+  'all-covered': {
+    note: 'Silver Hospital. All procedures covered. Baseline for the policy badge design — badge visible but unobtrusive.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:true, hasHosp:true,
+    cost:'$500', costNote:'Your $500 excess — once per admission, not per procedure',
+    confPct:85, confLabel:'High',
+    issues:[], upgrade:null,
+    procedures:[ PROC_KNEE, PROC_ARTHROSCOPY ],
+  },
+
+  'bronze-covered': {
+    note: 'Bronze Plus Hospital. Same procedures, same outcome — but the policy badge now reads Bronze Plus and the excess is higher. Tests whether the badge reads naturally as context rather than as a product label.',
+    policy: POLICIES.bronzePlus,
+    hasHospCover: true, hasProc:true, hasSpec:true, hasHosp:true,
+    cost:'$750', costNote:'Your $750 excess — once per admission, not per procedure',
+    confPct:85, confLabel:'High',
+    issues:[], upgrade:null,
+    procedures:[ PROC_KNEE, PROC_ARTHROSCOPY ],
+  },
+
+  'one-restricted': {
+    note: 'Silver Hospital. Meniscus repair is restricted — Bupa pays the public rate only at a private hospital. Shows the upgrade nudge as a future concept.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:true, hasHosp:true,
+    cost:'$1,080 – $1,820', costNote:'$500 excess plus a restricted benefit gap of $580–$1,320 for meniscus repair',
+    confPct:50, confLabel:'Medium',
+    issues:[{ type:'restricted', text:'Meniscus repair — restricted benefit. A gap applies at your private hospital.' }],
+    upgrade: {
+      text: 'Gold Hospital would cover meniscus repair in full — see how your estimate changes',
+    },
+    procedures:[ PROC_KNEE, PROC_MENISCUS ],
+  },
+
+  'one-excluded': {
+    note: 'Silver Hospital. Spinal fusion is excluded — Gold-tier category. Upgrade nudge shown as a future concept.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:true, hasHosp:true,
+    cost:'$3,000 – $5,500+', costNote:'$500 excess plus the full cost of spinal fusion — not covered on Silver',
+    confPct:40, confLabel:'Low',
+    issues:[{ type:'excluded', text:'Spinal fusion — not covered on Silver. You pay the full hospital and specialist cost.' }],
+    upgrade: {
+      text: 'Upgrading to Gold Hospital would cover spinal surgery — see how your estimate changes',
+    },
+    procedures:[ PROC_KNEE, PROC_SPINAL ],
+  },
+
+  'mixed': {
+    note: 'Silver Hospital. Three procedures, three coverage states. Upgrade nudge appears for both restricted and excluded items.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:true, hasHosp:true,
+    cost:'$3,580 – $7,320+', costNote:'Excess + restricted gap ($580–$1,320) + full excluded procedure cost ($2,500–$5,500+)',
+    confPct:25, confLabel:'Low',
+    issues:[
+      { type:'restricted', text:'Meniscus repair — restricted benefit. Gap applies at private hospital.' },
+      { type:'excluded',   text:'Spinal fusion — not covered on Silver. Full cost is yours.' },
+    ],
+    upgrade: {
+      text: 'Upgrading your cover could reduce these costs — see how your estimate changes',
+    },
+    procedures:[ PROC_KNEE, PROC_MENISCUS, PROC_SPINAL ],
+  },
+
+  // ── NO HOSPITAL COVER ────────────────────────────────────────────────────────
+  'extras-only': {
+    note: 'Customer holds Extras cover only — no hospital product. This is a blocking state: we can\'t estimate hospital costs and shouldn\'t try. The experience pivots to explaining the gap and offering a path forward.',
+    policy: null,          // no hospital policy to show
+    hasHospCover: false,
+    hasProc:true, hasSpec:true, hasHosp:true,
+    cost:null, costNote:null,
+    confPct:0, confLabel:null,
+    issues:[], upgrade:null,
+    procedures:[ PROC_KNEE, PROC_ARTHROSCOPY ],
+  },
+
+  // ── MISSING INPUTS ────────────────────────────────────────────────────────────
+  'no-proc': {
+    note: 'Silver Hospital. No procedures added — cover can\'t be checked, no estimate possible.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:false, hasSpec:true, hasHosp:true,
+    cost:'—', costNote:'Add your procedure to check cover and calculate an estimate',
+    confPct:0, confLabel:'None',
+    issues:[{ type:'missing', text:'No procedures added — we can\'t check your cover or calculate a cost.' }],
+    upgrade:null, procedures:null,
+  },
+  'no-spec': {
+    note: 'Silver Hospital. Procedures and hospital selected, no specialist. The wide range reflects unknown gap arrangement.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:false, hasHosp:true,
+    cost:'$500 – $2,700', costNote:'Range is wide — specialist gap arrangement unknown, could be $0 to $2,200+',
+    confPct:30, confLabel:'Low',
+    issues:[{ type:'missing', text:'No specialist selected — gap arrangement unknown, widening this estimate.' }],
+    upgrade:null,
+    procedures:[ PROC_KNEE, PROC_ARTHROSCOPY ],
+  },
+  'no-hosp': {
+    note: 'Silver Hospital. Procedures and specialist selected, no hospital. Contracted vs non-contracted status significantly affects facility costs.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:true, hasHosp:false,
+    cost:'$500 – $2,200', costNote:'Range includes possible non-contracted hospital gap — contracted status unknown',
+    confPct:35, confLabel:'Low',
+    issues:[{ type:'missing', text:'No hospital selected — non-contracted hospitals can add thousands to your cost.' }],
+    upgrade:null,
+    procedures:[ PROC_KNEE, PROC_ARTHROSCOPY ],
+  },
+  'no-prov': {
+    note: 'Silver Hospital. Procedures only — neither specialist nor hospital selected. Both are major cost variables.',
+    policy: POLICIES.silver,
+    hasHospCover: true, hasProc:true, hasSpec:false, hasHosp:false,
+    cost:'$500 – $4,900+', costNote:'Both specialist gap arrangement and hospital contracted status are unknown',
+    confPct:15, confLabel:'Very low',
+    issues:[
+      { type:'missing', text:'No specialist selected — gap arrangement unknown.' },
+      { type:'missing', text:'No hospital selected — contracted status unknown.' },
+    ],
+    upgrade:null,
+    procedures:[ PROC_KNEE, PROC_ARTHROSCOPY ],
+  },
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let openProcRows = {};
+let openSections = {};
+
+function applyScenario(key) { openProcRows = {}; openSections = {}; render(key); }
+function toggleSection(key) {
+  openSections[key] = !openSections[key];
+  render(document.getElementById('scenario-select').value);
+  if (openSections[key]) setTimeout(() => { const el = document.getElementById('sec-'+key); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 60);
+}
+function toggleProcRow(i) {
+  openProcRows[i] = !openProcRows[i];
+  render(document.getElementById('scenario-select').value);
+  if (openProcRows[i]) setTimeout(() => { const el = document.getElementById('proc-row-'+i); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 60);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(key) {
+  const s = SCENARIOS[key];
+  const p = s.policy;
+
+  // ── No hospital cover — full blocking state
+  if (!s.hasHospCover) {
+    document.getElementById('main-cta').textContent = '🔍 Explore hospital cover options';
+    document.getElementById('main-cta').className = 'btn-cta warning';
+
+    document.getElementById('main-page').innerHTML = `
+      <div class="scenario-note"><strong>Scenario:</strong> ${s.note}</div>
+
+      <div class="cover-warning" style="margin-top:0">
+        <div class="cover-warning-icon">⚠️</div>
+        <div class="cover-warning-body">
+          <div class="cover-warning-title">You don't hold hospital cover</div>
+          <div class="cover-warning-text">
+            We can see you hold Bupa Extras cover, but hospital cover is a separate product. Without it, Medicare covers some costs — but you have no entitlement to private hospital benefits, and out-of-pocket costs for procedures like these can run into thousands of dollars.
+            <br><br>
+            We can't provide a meaningful estimate without a hospital policy to assess against.
+          </div>
+          <button class="cover-warning-btn">🔍 Explore Bupa hospital cover</button>
+          <a class="cover-warning-link">Or call us on 134 135 to discuss your options</a>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-head" style="cursor:default">
+          <div class="section-head-icon" style="background:#FEF3C7">📋</div>
+          <div class="section-head-content">
+            <div class="section-head-label">Your current cover</div>
+            <div class="section-head-summary">Extras cover only</div>
+            <div class="section-head-meta">No hospital product held</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-head" style="cursor:default">
+          <div class="section-head-icon" style="background:#F1F5F9">💡</div>
+          <div class="section-head-content">
+            <div class="section-head-label">What hospital cover does</div>
+            <div class="section-head-summary">Covers your private hospital costs</div>
+            <div class="section-head-meta">Facility fees, theatre, MBS benefits, gap arrangements</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-card">
+        <div class="cta-title">What you can do</div>
+        <div class="cta-action">
+          <div class="cta-icon" style="background:#FEF3C7">📞</div>
+          <div class="cta-info">
+            <div class="cta-label">Call us to talk through your options</div>
+            <div class="cta-sub">We can explain what hospital cover would mean for your specific procedure and situation</div>
+          </div>
+          <span class="cta-arrow">›</span>
+        </div>
+        <div class="cta-action">
+          <div class="cta-icon" style="background:#F0FDF4">🏥</div>
+          <div class="cta-info">
+            <div class="cta-label">See what's covered under Medicare only</div>
+            <div class="cta-sub">Get an idea of your public hospital options without private cover</div>
+          </div>
+          <span class="cta-arrow">›</span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // ── Normal flow ───────────────────────────────────────────────────────────
+
+  document.getElementById('main-cta').className = 'btn-cta';
+  document.getElementById('main-cta').textContent =
+    (!s.hasProc || (!s.hasSpec && !s.hasHosp)) ? '＋ Complete your estimate' : '📞 Call 134 135 to confirm costs';
+
+  // Policy badge
+  const policyBadgeHtml = p ? `
+    <div class="hero-policy-row">
+      <div class="policy-badge">
+        <span class="policy-badge-dot" style="background:${p.dotColor}"></span>
+        <span class="policy-badge-label">${p.name}</span>
+      </div>
+      <span class="policy-context">· ${p.excess} excess</span>
+    </div>` : '';
+
+  // Issues strip
+  const issuesHtml = s.issues.length
+    ? `<div class="hero-issues">${s.issues.map(iss =>
+        `<div class="hero-issue-row"><span class="issue-dot ${iss.type}"></span><span>${iss.text}</span></div>`
+      ).join('')}</div>`
+    : '';
+
+  // Upgrade nudge
+  const upgradeHtml = s.upgrade ? `
+    <div class="upgrade-nudge">
+      <div class="upgrade-nudge-body">
+        <div class="upgrade-nudge-label">Future idea</div>
+        <div class="upgrade-nudge-text">${s.upgrade.text}</div>
+      </div>
+      <span class="upgrade-nudge-arrow">›</span>
+    </div>` : '';
+
+  // ── PROCEDURES SECTION
+  let procSectionHtml;
+  if (!s.hasProc) {
+    procSectionHtml = buildSection({
+      id:'procedures', iconBg:'#F1F5F9', icon:'＋', label:'Procedures',
+      summaryClass:'empty-text', summary:'No procedures added yet',
+      meta:'Add a procedure to check your cover',
+      toggleLabel:'Add ＋', isEmpty:true,
+      bodyHtml:`<div class="edu-block">
+        <span class="edu-icon">🔬</span>
+        <div class="edu-title">Why do we need your procedure?</div>
+        <div class="edu-body">Your hospital cover is organised into clinical categories. Without knowing your procedure, we can't check whether it's covered or calculate a cost estimate.</div>
+        <div class="edu-points">
+          <div class="edu-point"><span class="edu-point-dot edot-blue">1</span><span class="edu-point-text">We check that your procedure falls within a covered clinical category on your plan</span></div>
+          <div class="edu-point"><span class="edu-point-dot edot-green">2</span><span class="edu-point-text">We confirm your waiting period status for that category</span></div>
+          <div class="edu-point"><span class="edu-point-dot edot-warn">3</span><span class="edu-point-text">We calculate how your excess applies — once per admission, not per item code</span></div>
+        </div>
+        <button class="edu-btn primary">＋ Add a procedure or MBS code</button>
+      </div>`,
+    });
+  } else {
+    const procs = s.procedures;
+    const counts = { covered:0, restricted:0, excluded:0 };
+    procs.forEach(pr => counts[pr.status]++);
+    const pillsHtml = [
+      counts.covered    ? `<span class="proc-status-pill pill-covered">${counts.covered} covered</span>` : '',
+      counts.restricted ? `<span class="proc-status-pill pill-restricted">${counts.restricted} restricted</span>` : '',
+      counts.excluded   ? `<span class="proc-status-pill pill-excluded">${counts.excluded} not covered</span>` : '',
+    ].join('');
+    const procNames = procs.map(pr => pr.name);
+    const procSummary = procNames.length <= 2 ? procNames.join(' · ') : procNames[0] + ' +' + (procNames.length-1) + ' more';
+    const procMeta = `${procs.length} procedure${procs.length!==1?'s':''} · MBS ${procs.map(pr=>pr.code).join(', ')}`;
+    const statusIcon  = { covered:'✓', restricted:'⚠', excluded:'✕' };
+    const statusLabel = { covered:'Covered', restricted:'Restricted', excluded:'Not covered' };
+    const rowsHtml = procs.map((pr, i) => {
+      const isOpen = !!openProcRows[i];
+      const pointsHtml = pr.points ? `<div class="proc-points">${pr.points.map(pt =>
+        `<div class="proc-point"><span class="point-dot ${pt.dot}"></span><span class="proc-point-text">${pt.text}</span></div>`).join('')}</div>` : '';
+      return `<div class="proc-row ${pr.status} ${isOpen?'open':''}" id="proc-row-${i}">
+        <div class="proc-row-head" onclick="toggleProcRow(${i})">
+          <div class="proc-row-icon row-icon-${pr.status}">${statusIcon[pr.status]}</div>
+          <div class="proc-row-info"><div class="proc-row-name">${pr.name}</div><div class="proc-row-code">MBS ${pr.code} · ${pr.category}</div></div>
+          <span class="proc-row-badge rbadge-${pr.status}">${statusLabel[pr.status]}</span>
+          <span class="proc-row-arrow">▾</span>
+        </div>
+        <div class="proc-row-body"><div class="proc-row-body-inner">
+          <div class="proc-explanation ${pr.status}"><div class="proc-exp-title">${pr.exp.title}</div><div>${pr.exp.body}</div></div>
+          ${pointsHtml}
+        </div></div>
+      </div>`;
+    }).join('');
+    const hasMix = counts.restricted > 0 || counts.excluded > 0;
+    procSectionHtml = buildSection({
+      id:'procedures', iconBg:'var(--light-blue)', icon:'🔬', label:'Procedures',
+      summary:procSummary, meta:procMeta, toggleLabel:'Details', isEmpty:false,
+      bodyHtml: `${hasMix ? `<div class="proc-status-bar">${pillsHtml}</div>` : ''}${rowsHtml}`,
+    });
+  }
+
+  // ── PROVIDERS SECTION
+  let providerRowsHtml = '';
+  if (!s.hasSpec) {
+    providerRowsHtml += `<div class="prov-empty-note">
+      <div class="prov-empty-icon">👤</div>
+      <div class="prov-empty-body">
+        <div class="prov-empty-label">Specialist</div>
+        <div class="prov-empty-heading">Why your specialist matters</div>
+        <div class="prov-empty-text">Your specialist's billing arrangement is one of the biggest factors in your out-of-pocket cost.</div>
+        <div class="prov-empty-points">
+          <div class="prov-empty-point"><span class="pep-dot edot-green">✓</span><span style="font-size:0.76rem;color:var(--mid)"><strong>No-gap</strong> — no specialist fee out of pocket</span></div>
+          <div class="prov-empty-point"><span class="pep-dot edot-warn">!</span><span style="font-size:0.76rem;color:var(--mid)"><strong>Known-gap</strong> — a fixed fee; ask their rooms for the amount</span></div>
+          <div class="prov-empty-point"><span class="pep-dot edot-blue">?</span><span style="font-size:0.76rem;color:var(--mid)"><strong>No arrangement</strong> — charges above MBS fee are your cost</span></div>
+        </div>
+        <button class="edu-btn primary" style="margin-bottom:4px">＋ Search for your specialist</button>
+        <button class="edu-btn secondary">I haven't chosen a specialist yet</button>
+      </div>
+    </div>`;
+  } else {
+    providerRowsHtml += `<div class="context-row">
+      <div class="context-row-icon" style="background:#EDE9FE">👤</div>
+      <div class="context-row-info"><div class="context-row-label">Specialist</div><div class="context-row-name">Dr Sarah Chen</div><div class="context-row-sub">Orthopaedic Surgeon · North Sydney</div></div>
+      <span class="ctx-badge" style="background:var(--success-bg);color:var(--success)">No-gap</span>
+      <button class="ctx-btn">Change</button>
+    </div>`;
+  }
+  if (!s.hasHosp) {
+    providerRowsHtml += `<div class="prov-empty-note">
+      <div class="prov-empty-icon">🏥</div>
+      <div class="prov-empty-body">
+        <div class="prov-empty-label">Hospital</div>
+        <div class="prov-empty-heading">Why your hospital matters</div>
+        <div class="prov-empty-text">Contracted hospitals have agreed pricing with Bupa. At a non-contracted hospital, the gap can run into thousands.</div>
+        <div class="prov-empty-points">
+          <div class="prov-empty-point"><span class="pep-dot edot-green">✓</span><span style="font-size:0.76rem;color:var(--mid)"><strong>Contracted</strong> — facility fees at agreed rates</span></div>
+          <div class="prov-empty-point"><span class="pep-dot edot-warn">!</span><span style="font-size:0.76rem;color:var(--mid)"><strong>Non-contracted</strong> — gap between Bupa's benefit and the charge is your cost</span></div>
+        </div>
+        <button class="edu-btn primary" style="margin-bottom:4px">＋ Search for your hospital</button>
+        <button class="edu-btn secondary">I haven't chosen a hospital yet</button>
+      </div>
+    </div>`;
+  } else {
+    providerRowsHtml += `<div class="context-row">
+      <div class="context-row-icon" style="background:#D1FAE5">🏥</div>
+      <div class="context-row-info"><div class="context-row-label">Hospital</div><div class="context-row-name">Mater Hospital</div><div class="context-row-sub">Private · North Sydney</div></div>
+      <span class="ctx-badge" style="background:#DBEAFE;color:var(--navy)">Contracted</span>
+      <button class="ctx-btn">Change</button>
+    </div>`;
+  }
+  const neitherProv = !s.hasSpec && !s.hasHosp;
+  const provSummary = neitherProv ? 'No specialist or hospital selected' : !s.hasSpec ? 'Specialist not selected · Mater Hospital' : !s.hasHosp ? 'Dr Sarah Chen · Hospital not selected' : 'Dr Sarah Chen · Mater Hospital';
+  const provMeta    = neitherProv ? 'Both affect your costs significantly' : !s.hasSpec ? 'Gap arrangement unknown · Contracted hospital ✅' : !s.hasHosp ? 'No-gap specialist ✅ · Hospital status unknown' : 'No-gap specialist · Contracted hospital';
+  const provSectionHtml = buildSection({
+    id:'providers', iconBg: (!s.hasSpec||!s.hasHosp)?'#F1F5F9':'#F0FDF4', icon:(!s.hasSpec||!s.hasHosp)?'＋':'🏥',
+    label:'Providers', summaryClass:neitherProv?'empty-text':'', summary:provSummary, meta:provMeta,
+    toggleLabel:(!s.hasSpec||!s.hasHosp)?'Add ＋':'Details', isEmpty:neitherProv,
+    bodyHtml:providerRowsHtml,
+  });
+
+  document.getElementById('main-page').innerHTML = `
+    <div class="scenario-note"><strong>Scenario:</strong> ${s.note}</div>
+
+    <div class="estimate-hero" style="margin-top:0">
+      ${policyBadgeHtml}
+      <div class="hero-cost-label">Estimated cost to you</div>
+      <div class="hero-cost-amount ${s.cost==='—'?'dim':''}">${s.cost}</div>
+      <div class="hero-cost-note">${s.costNote}</div>
+      <div class="conf-wrap">
+        <div class="conf-row"><span>Estimate confidence</span><span>${s.confLabel}</span></div>
+        <div class="conf-track"><div class="conf-fill" style="width:${s.confPct}%"></div></div>
+      </div>
+      ${issuesHtml}
+      ${upgradeHtml}
+      <div class="hero-disclaimer">This is an estimate only. Actual costs depend on your specialist's final charges and clinical decisions. Call us before booking to confirm.</div>
+    </div>
+
+    ${procSectionHtml}
+    ${provSectionHtml}
+
+    <div class="cta-card">
+      <div class="cta-title">Before you book</div>
+      <div class="cta-action">
+        <div class="cta-icon" style="background:#DBEAFE">📞</div>
+        <div class="cta-info"><div class="cta-label">Call us to confirm your costs</div><div class="cta-sub">We'll check your policy, waiting period status, and all provider arrangements</div></div>
+        <span class="cta-arrow">›</span>
+      </div>
+      <div class="cta-action">
+        <div class="cta-icon" style="background:var(--warn-bg)">📋</div>
+        <div class="cta-info"><div class="cta-label">Ask your specialist for an itemised quote</div><div class="cta-sub">Then call us to check each item against your cover</div></div>
+        <span class="cta-arrow">›</span>
+      </div>
+    </div>`;
+}
+
+function buildSection({ id, iconBg, icon, label, summary, summaryClass='', meta, toggleLabel, isEmpty, bodyHtml }) {
+  const isOpen = !!openSections[id];
+  return `<div class="section-card ${isOpen?'open':''} ${isEmpty?'empty-card':''}" id="sec-${id}">
+    <div class="section-head" onclick="toggleSection('${id}')">
+      <div class="section-head-icon" style="background:${iconBg}">${icon}</div>
+      <div class="section-head-content">
+        <div class="section-head-label">${label}</div>
+        <div class="section-head-summary ${summaryClass}">${summary}</div>
+        <div class="section-head-meta">${meta}</div>
+      </div>
+      <button class="section-toggle">${toggleLabel} <span class="toggle-arrow">▾</span></button>
+    </div>
+    <div class="section-body"><div class="section-body-inner">${bodyHtml}</div></div>
+  </div>`;
+}
+
+applyScenario('all-covered');
+</script>
+</body>
+</html>
